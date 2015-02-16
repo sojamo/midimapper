@@ -1,0 +1,7 @@
+.DS_Store
+.classpath
+.externalToolBuilders
+.project
+.settings
+dist/
+target/
