@@ -1,7 +1,6 @@
 # Change Log
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/). More details at [keep a changelog](http://keepachangelog.com/)
 
-<!-- ## 0.1.1-alpha.1 -->
 
 ## 0.1.1-alpha - 2014-02-17
 ### Changed
