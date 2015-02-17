@@ -30,15 +30,20 @@ public class MidiMapper {
 		welcome( );
 	}
 
-	public final boolean test( String theDevice ) {
+	public final AssignedDevice test( String theDevice ) {
 		return connect( theDevice , new TestReceiver( theDevice ) );
 	}
 
-	public final boolean connect( int theDeviceId , Receiver ... theReceivers ) {
+	public final AssignedDevice connect( int theDeviceId , Receiver ... theReceivers ) {
 		out( "connect to id not yet implemented" );
-		return false;
+		return null;
 	}
-	
+
+	public final AssignedDevice connect( int theDeviceId ) {
+		out( "connect to id not yet implemented" );
+		return null;
+	}
+
 	public final AssignedDevice connect( String theDevice ) {
 		try {
 			MidiDevice device;
@@ -52,6 +57,32 @@ public class MidiMapper {
 			log.info( String.format( "No Midi device ( %1s ) is available." , theDevice ) );
 			return new AssignedDevice( parent , null );
 		}
+	}
+
+	public final AssignedDevice connect( String theDevice , Receiver ... theReceivers ) {
+
+		try {
+			MidiDevice device;
+			device = MidiSystem.getMidiDevice( getMidiDeviceInfo( theDevice , false ) );
+			device.open( );
+
+			for ( Receiver receiver : theReceivers ) {
+				Transmitter conTrans = device.getTransmitter( );
+				conTrans.setReceiver( receiver );
+			}
+			return new AssignedDevice( parent , device );
+		} catch ( MidiUnavailableException e ) {
+			// TODO Auto-generated catch block
+			e.printStackTrace( );
+			return new AssignedDevice( parent , null );
+		} catch ( NullPointerException e ) {
+			log.info( String.format( "No Midi device ( %1s ) is available." , theDevice ) );
+			return new AssignedDevice( parent , null );
+		}
+	}
+
+	private final void welcome( ) {
+		log.info( String.format( "midimap, %1s" , VERSION ) );
 	}
 
 	/* theData1 corresponds to the id of the midi message, theData2 is a midi value between 0-127 */
@@ -81,32 +112,6 @@ public class MidiMapper {
 		return this;
 	}
 
-	public final boolean connect( String theDevice , Receiver ... theReceivers ) {
-
-		try {
-			MidiDevice device;
-			device = MidiSystem.getMidiDevice( getMidiDeviceInfo( theDevice , false ) );
-			device.open( );
-
-			for ( Receiver receiver : theReceivers ) {
-				Transmitter conTrans = device.getTransmitter( );
-				conTrans.setReceiver( receiver );
-			}
-		} catch ( MidiUnavailableException e ) {
-			// TODO Auto-generated catch block
-			e.printStackTrace( );
-			return false;
-		} catch ( NullPointerException e ) {
-			log.info( String.format( "No Midi device ( %1s ) is available." , theDevice ) );
-			return false;
-		}
-		return true;
-	}
-
-	private final void welcome( ) {
-		log.info( String.format( "midimap, %1s" , VERSION ) );
-	}
-
 	static public void list( ) {
 		find( "" );
 	}
@@ -131,10 +136,6 @@ public class MidiMapper {
 			}
 		}
 		log.info( msg.toString( ) );
-	}
-
-	public MidiNote assign( int theNote ) {
-		return new MidiNote( parent , theNote );
 	}
 
 	static public Object invoke( final Object theObject , final String theMember , final Object ... theParams ) {

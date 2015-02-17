@@ -3,6 +3,7 @@
 import sojamo.midimapper.*;
 
 MidiMapper midi;
+AssignedDevice korg;
 
 float n;
 Test test;
@@ -21,7 +22,9 @@ void setup() {
   test = new Test();
   
   /* connect Midi Mapper to a midi device and assign members of this sketch to midi controls. */
-  midi.connect("SLIDER/KNOB", midi.assign(16).to("n"), midi.assign(17).to(test,"b"), midi.assign(18).to("c"));
+ korg = midi.connect("SLIDER/KNOB");
+ korg.assign(16).to("n").assign(17).to(test,"b").assign(18).to("c");
+
 }
 
 
