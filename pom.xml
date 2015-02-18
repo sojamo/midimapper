@@ -3,7 +3,7 @@
   <groupId>sojamo.midimapper</groupId>
   <artifactId>midimapper</artifactId>
   <packaging>jar</packaging>
-  <version>0.1.1</version>
+  <version>0.1.2-alpha</version>
   <name>midimapper</name>
   <description>maps midi input to variables and functions.</description>
 <properties>

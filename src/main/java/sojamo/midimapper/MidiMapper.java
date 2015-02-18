@@ -4,7 +4,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -19,10 +21,8 @@ import javax.sound.midi.Transmitter;
 
 public class MidiMapper {
 
-	private final static Logger log = Logger.getLogger( MidiMapper.class.getName( ) );
-
-	static public final String VERSION = "0.1.1";
-
+	static private final Logger log = Logger.getLogger( MidiMapper.class.getName( ) );
+	static public final String VERSION = "0.1.2-alpha";
 	private final Object parent;
 
 	public MidiMapper( Object theObject ) {
@@ -30,59 +30,68 @@ public class MidiMapper {
 		welcome( );
 	}
 
-	public final AssignedDevice test( String theDevice ) {
-		return connect( theDevice , new TestReceiver( theDevice ) );
+	private final void welcome( ) {
+		log.info( String.format( "midimap, %1s" , VERSION ) );
 	}
 
-	public final AssignedDevice connect( int theDeviceId , Receiver ... theReceivers ) {
-		out( "connect to id not yet implemented" );
-		return null;
+	public final AssignedDevice test( AssignedDevice theDevice ) {
+		return test( theDevice.getName( ) );
 	}
 
-	public final AssignedDevice connect( int theDeviceId ) {
-		out( "connect to id not yet implemented" );
-		return null;
+	public final AssignedDevice test( String theName ) {
+		return connect( theName , new TestReceiver( theName ) );
 	}
 
-	public final AssignedDevice connect( String theDevice ) {
+	public final AssignedDevice test( int theId ) {
+		return connect( getNameFromId( theId ) , new TestReceiver( getNameFromId( theId ) ) );
+	}
+
+	public String getNameFromId( int theId ) {
+		return MidiSystem.getMidiDeviceInfo( )[ theId ].getName( );
+	}
+
+	public final AssignedDevice connect( int theId , Receiver ... theReceivers ) {
+		return connect( getNameFromId( theId ) , theReceivers );
+	}
+
+	public final AssignedDevice connect( int theId ) {
+		return connect( getNameFromId( theId ) );
+	}
+
+	public final AssignedDevice connect( String theName ) {
 		try {
 			MidiDevice device;
-			device = MidiSystem.getMidiDevice( getMidiDeviceInfo( theDevice , false ) );
+			device = MidiSystem.getMidiDevice( getMidiDeviceInfo( theName , false ) );
 			device.open( );
-			return new AssignedDevice( parent , device );
+			return new AssignedDevice( parent , device , theName );
 		} catch ( MidiUnavailableException e ) {
 			e.printStackTrace( );
-			return new AssignedDevice( parent , null );
+			return new AssignedDevice( parent , null , theName );
 		} catch ( NullPointerException e ) {
-			log.info( String.format( "No Midi device ( %1s ) is available." , theDevice ) );
-			return new AssignedDevice( parent , null );
+			log.info( String.format( "No Midi device ( %1s ) is available." , theName ) );
+			return new AssignedDevice( parent , null , theName );
 		}
 	}
 
-	public final AssignedDevice connect( String theDevice , Receiver ... theReceivers ) {
+	public final AssignedDevice connect( String theName , Receiver ... theReceivers ) {
 
 		try {
-			MidiDevice device;
-			device = MidiSystem.getMidiDevice( getMidiDeviceInfo( theDevice , false ) );
+			MidiDevice device = MidiSystem.getMidiDevice( getMidiDeviceInfo( theName , false ) );
 			device.open( );
 
 			for ( Receiver receiver : theReceivers ) {
 				Transmitter conTrans = device.getTransmitter( );
 				conTrans.setReceiver( receiver );
 			}
-			return new AssignedDevice( parent , device );
+			return new AssignedDevice( parent , device , theName );
 		} catch ( MidiUnavailableException e ) {
 			// TODO Auto-generated catch block
 			e.printStackTrace( );
-			return new AssignedDevice( parent , null );
+			return new AssignedDevice( parent , null , theName );
 		} catch ( NullPointerException e ) {
-			log.info( String.format( "No Midi device ( %1s ) is available." , theDevice ) );
-			return new AssignedDevice( parent , null );
+			log.info( String.format( "No Midi device ( %1s ) is available." , theName ) );
+			return new AssignedDevice( parent , null , theName );
 		}
-	}
-
-	private final void welcome( ) {
-		log.info( String.format( "midimap, %1s" , VERSION ) );
 	}
 
 	/* theData1 corresponds to the id of the midi message, theData2 is a midi value between 0-127 */
@@ -112,30 +121,30 @@ public class MidiMapper {
 		return this;
 	}
 
-	static public void list( ) {
-		find( "" );
+	static public ArrayList list( ) {
+		return find( "" );
 	}
 
-	static public void find( final String thePattern ) {
+	static public ArrayList find( final String thePattern ) {
 		MidiDevice.Info[] info = MidiSystem.getMidiDeviceInfo( );
-		StringBuffer msg = new StringBuffer( );
-		msg.append( "Midi Devices discovered:\n" );
+		ArrayList found = new ArrayList( );
 		for ( int i = 0 ; i < info.length ; i++ ) {
 			try {
 				MidiDevice device = MidiSystem.getMidiDevice( info[ i ] );
 				boolean in = ( device.getMaxTransmitters( ) != 0 );
 				boolean out = ( device.getMaxReceivers( ) != 0 );
-				boolean a = info[ i ].getName( ).toLowerCase( ).contains( thePattern.toLowerCase( ) );
-				boolean b = info[ i ].getVendor( ).toLowerCase( ).contains( thePattern.toLowerCase( ) );
-				boolean c = info[ i ].getDescription( ).toLowerCase( ).contains( thePattern.toLowerCase( ) );
+				String pattern = "(?i)^.*?(" + thePattern + ").*$";
+				boolean a = info[ i ].getName( ).matches( pattern );
+				boolean b = info[ i ].getVendor( ).matches( pattern );
+				boolean c = info[ i ].getDescription( ).matches( pattern );
 				if ( thePattern.length( ) == 0 || ( a || b || c ) ) {
-					msg.append( String.format( "{  id:%d\n  name: %2s\n  in? %3s\n  out? %4s\n  vendor: %5s\n  version: %6s\n  info: %7s }\n" , i , info[ i ].getName( ) , in , out , info[ i ].getVendor( ) , info[ i ].getVersion( ) , info[ i ].getDescription( ) ) );
+					found.add( toMap( "id" , i , "name" , info[ i ].getName( ) , "in?" , in , "out?" , out , "vendor" , info[ i ].getVendor( ) , "version" , info[ i ].getVersion( ) , "description" , info[ i ].getDescription( ) ) );
 				}
 			} catch ( MidiUnavailableException e ) {
 				e.printStackTrace( );
 			}
 		}
-		log.info( msg.toString( ) );
+		return found;
 	}
 
 	static public Object invoke( final Object theObject , final String theMember , final Object ... theParams ) {
@@ -195,6 +204,18 @@ public class MidiMapper {
 		return null;
 	}
 
+	static public int i( final Object o , final int theDefault ) {
+		return ( o instanceof Number ) ? ( ( Number ) o ).intValue( ) : ( o instanceof String ) ? i( s( o ) ) : theDefault;
+	}
+
+	static public String s( final Object o ) {
+		return ( o != null ) ? o.toString( ) : "";
+	}
+
+	static public int i( final String o , final int theDefault ) {
+		return isNumeric( o ) ? Integer.parseInt( o ) : theDefault;
+	}
+
 	static public boolean b( Object o ) {
 		return ( o instanceof Boolean ) ? ( ( Boolean ) o ).booleanValue( ) : ( o instanceof Number ) ? ( ( Number ) o ).intValue( ) == 0 ? false : true : false;
 	}
@@ -240,6 +261,16 @@ public class MidiMapper {
 
 	static public boolean isNumeric( String str ) {
 		return str.matches( "(-|\\+)?\\d+(\\.\\d+)?" );
+	}
+
+	static public Map toMap( final Object ... args ) {
+		Map m = new LinkedHashMap( );
+		if ( args.length % 2 == 0 ) {
+			for ( int i = 0 ; i < args.length ; i += 2 ) {
+				m.put( args[ i ] , args[ i + 1 ] );
+			}
+		}
+		return m;
 	}
 
 	static public ByteBuffer clone( ByteBuffer original ) {
@@ -360,24 +391,23 @@ public class MidiMapper {
 		}
 
 		public void send( MidiMessage msg , long timeStamp ) {
-			System.out.println( "midi received (" + name + ")" );
-			System.out.println( "Timestamp: " + timeStamp );
+
 			byte[] b = msg.getMessage( );
+			Map result = new LinkedHashMap( );
+			
+			result.put( "name" , name );
+			result.put( "type" , commandMap.get( b[ 0 ] ) );
+			result.put( "status" , msg.getStatus( ) );
 
 			if ( b[ 0 ] != -48 ) {
-				// System.out.println("Message length: " +
-				// msg.getLength());
-				System.out.println( "Note command: " + commandMap.get( b[ 0 ] ) );
-				System.out.println( "Which note: " + b[ 1 ] );
-				System.out.println( "Note pressure: " + b[ 2 ] );
-				System.out.println( "---------------------" );
+				result.put( "note" , b[ 1 ] );
+				result.put( "pressure" , b[ 2 ] );
 			} else {
-				// System.out.println("Message length: " +
-				// msg.getLength());
-				System.out.println( "Note command: " + commandMap.get( b[ 0 ] ) );
-				System.out.println( "Note Pressure: " + b[ 1 ] );
-				System.out.println( "---------------------" );
+				result.put( "pressure" , b[ 1 ] );
 			}
+			result.put( "time-stamp" , timeStamp );
+
+			System.out.println( result.toString( ) );
 		}
 
 		public void close( ) {

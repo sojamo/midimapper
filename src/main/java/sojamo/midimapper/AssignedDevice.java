@@ -6,10 +6,12 @@ public class AssignedDevice {
 
 	private final MidiDevice device;
 	private final Object parent;
-
-	AssignedDevice( Object theParent , MidiDevice theDevice ) {
+	private final String name;
+	
+	AssignedDevice( Object theParent , MidiDevice theDevice, String theName ) {
 		parent = theParent;
 		device = theDevice;
+		name = theName;
 	}
 
 	public MidiNote assign( int theNote ) {
@@ -22,6 +24,10 @@ public class AssignedDevice {
 
 	public boolean exists( ) {
 		return !device.equals( null );
+	}
+	
+	public String getName() {
+		return name;
 	}
 	
 }
