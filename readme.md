@@ -3,7 +3,7 @@
 MidiMapper is a processing library that allows to maps midi devices and their events to members of a sketch such as variables and functions. Currently this library is in development stage.
 
 ## The most basic example
-Connect to a midi device and assign a note to a variable. Controller changes will be automatically assigned to the value of the variable.
+Connect to a midi device and assign a note to a variable. Controller changes will be automatically applied to the value of the variable.
 
 ```java
 
@@ -13,6 +13,7 @@ Connect to a midi device and assign a note to a variable. Controller changes wil
 
 	void setup() {
 	  midi = new MidiMapper(this);
+	  /* SLIDER/KNOB is the name of the Korg nanoKontrol2 device as detected on osx */
 	  midi.connect("SLIDER/KNOB").assign(16).to("a");
 	}
 
