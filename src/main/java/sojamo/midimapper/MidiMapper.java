@@ -22,7 +22,7 @@ import javax.sound.midi.Transmitter;
 public class MidiMapper {
 
 	static private final Logger log = Logger.getLogger( MidiMapper.class.getName( ) );
-	static public final String VERSION = "0.1.2-alpha";
+	static public final String VERSION = "0.1.3-alpha";
 	private final Object parent;
 
 	public MidiMapper( Object theObject ) {
@@ -101,11 +101,20 @@ public class MidiMapper {
 		try {
 			receiver = MidiSystem.getReceiver( );
 		} catch ( MidiUnavailableException e ) {
-			System.err.println( "Midi Device unavailable." );
+			System.err.println( "Midi Device unavailable." + e );
 		}
 		int command = ShortMessage.CONTROL_CHANGE;
 		int timeStamp = -1;
 		return send( receiver , command , theChannel , theData1 , theData2 , timeStamp );
+	}
+
+	public MidiMapper send( MidiOutMapper theMidiOutMapper , int theChannel , int theData1 , int theData2 ) {
+		int command = ShortMessage.CONTROL_CHANGE;
+		int timeStamp = -1;
+		if ( theMidiOutMapper.getReceiver( ) != null ) {
+			send( theMidiOutMapper.getReceiver( ) , command , theChannel , theData1 , theData2 , timeStamp );
+		}
+		return this;
 	}
 
 	public MidiMapper send( Receiver theReceiver , int theCommand , int theChannel , int theData1 , int theData2 , int theTimeStamp ) {
@@ -394,7 +403,7 @@ public class MidiMapper {
 
 			byte[] b = msg.getMessage( );
 			Map result = new LinkedHashMap( );
-			
+
 			result.put( "name" , name );
 			result.put( "type" , commandMap.get( b[ 0 ] ) );
 			result.put( "status" , msg.getStatus( ) );
