@@ -1,6 +1,12 @@
 # Change Log
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/). More details at [keep a changelog](http://keepachangelog.com/)
 
+
+## 0.1.3-alpha - 2014-03-05
+### Added
+  - Adding Midi out support for virtual devices
+
+
 ## 0.1.2-alpha - 2014-02-18
 ### Changed
   - Most changes apply to MidiMapper, since this is still under heavy development I save the details for later.

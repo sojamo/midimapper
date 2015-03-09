@@ -7,6 +7,7 @@ float n;
 
 void setup() {
   midi = new MidiMapper(this);
+  println(midi.list());
   println(MidiOutMapper.list());
   out = new MidiOutMapper();
   out.assign("/1/fader", 1,1); 
