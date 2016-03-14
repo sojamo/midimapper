@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/). More details at [keep a changelog](http://keepachangelog.com/)
 
 
+## 0.1.4-alpha - 2016-02-01
+### Added
+  - Moving from Eclipse to IntelliJ
+
 ## 0.1.3-alpha - 2014-03-05
 ### Added
   - Adding Midi out support for virtual devices
@@ -18,7 +22,7 @@ All notable changes to this project will be documented in this file. This projec
 
 ## 0.1.1-alpha - 2014-02-17
 ### Changed
-  - changes made to the way method chaining is used with an AssignedDevice 
+  - changes made to the way method chaining is used with an AssignedDevice
 
 ### Added
   - changelog file to keep track of changes.

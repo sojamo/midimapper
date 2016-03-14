@@ -3,20 +3,22 @@ import sojamo.midimapper.*;
 MidiMapper midi;
 MidiOutMapper out;
 
-float n;
-
 void setup() {
+  size(800, 400);
   midi = new MidiMapper(this);
-  println(midi.list());
-  println(MidiOutMapper.list());
+
   out = new MidiOutMapper();
-  out.assign("/1/fader", 1,1); 
+  // assign an index to a midi channel and note
+  String index = "/1/fader"; 
+  int channel = 1;
+  int note = 1;
+  out.assign( index, channel, note);
 }
 
 void keyPressed() {
-  // midi.send(1,1,int(random(127)));
-  // midi.send(out, 1,1,int(random(127)));
-  println(out.isAvailable());
+  
+  // println(out.isAvailable());
+  // send a midi control-change previously assigned to an index  
   out.send("/1/fader", frameCount%127);
 }
 
@@ -24,3 +26,4 @@ void keyPressed() {
 
 void draw() {
 }
+

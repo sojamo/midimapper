@@ -3,13 +3,13 @@
   <groupId>sojamo.midimapper</groupId>
   <artifactId>midimapper</artifactId>
   <packaging>jar</packaging>
-  <version>0.1.3-alpha</version>
+  <version>0.2.1</version>
   <name>midimapper</name>
   <description>maps midi input to variables and functions.</description>
 	<properties>
-		<jdk.version>1.7</jdk.version>
+		<jdk.version>1.8</jdk.version>
 	</properties>
- 	
+
  	<dependencies>
  		<dependency>
 			<groupId>junit</groupId>
@@ -17,15 +17,15 @@
 			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency> 
-      		<groupId>org.processing</groupId> 
-      		<artifactId>papplet</artifactId> 
-      		<version>${java.version}</version> 
-      		<scope>system</scope> 
-      		<systemPath>${user.home}/Documents/workspace/libs/p5_2.2.1/core.jar</systemPath> 
-    	</dependency> 
+		<dependency>
+      		<groupId>org.processing</groupId>
+      		<artifactId>papplet</artifactId>
+      		<version>${java.version}</version>
+      		<scope>system</scope>
+      		<systemPath>${user.home}/Documents/workspace/libs/p5_3/core.jar</systemPath>
+    	</dependency>
 	</dependencies>
-	
+
 	<build>
 	<plugins>
 	  <plugin>
